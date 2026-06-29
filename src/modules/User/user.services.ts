@@ -1,6 +1,7 @@
+import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { User } from "./user.interface";
-// import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 
 
@@ -11,14 +12,12 @@ const getUserIntoDB = async () => {
         }
     });
 
-
     return userData;
    
 }
 
 const createUserIntoDB = async (payload: User) => {
     const { name, email, password, profilePhoto } = payload;
-    console.log(payload)
     const isUserExist = await prisma.user.findUnique({
         where: {
             email: email
@@ -27,17 +26,23 @@ const createUserIntoDB = async (payload: User) => {
     if (isUserExist) {
         throw new Error("User with this email already exists");
     }
-    // const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds))
+     const hashedPassword = await bcrypt.hash(password, Number(config.bcrypt_salt_rounds))
 
-    const userData = await prisma.user.create({
+    const createdUser = await prisma.user.create({
         data: {
             name,
             email,
-            password,
-            profilePhoto
+            password: hashedPassword,
         }
     });
-    return userData;
+
+    await prisma.profile.create({
+        data: {
+            userId: createdUser.id,
+            profilePhoto
+        }
+    })
+    return createdUser;
 }
 
 
