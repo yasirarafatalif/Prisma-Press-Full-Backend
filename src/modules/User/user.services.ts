@@ -33,15 +33,20 @@ const createUserIntoDB = async (payload: User) => {
             name,
             email,
             password: hashedPassword,
+            profile:{
+                create: {
+                    profilePhoto
+                }
+            }
         }
     });
 
-    await prisma.profile.create({
-        data: {
-            userId: createdUser.id,
-            profilePhoto
-        }
-    })
+    // await prisma.profile.create({
+    //     data: {
+    //         userId: createdUser.id,
+    //         profilePhoto
+    //     }
+    // })
     return createdUser;
 }
 
