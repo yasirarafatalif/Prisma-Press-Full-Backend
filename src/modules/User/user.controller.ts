@@ -1,14 +1,8 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, response, Response } from "express";
 import { userServices } from "./user.services";
-import {
-  ReasonPhrases,
-  StatusCodes,
-  getReasonPhrase,
-  getStatusCode,
-} from "http-status-codes";
+import {StatusCodes} from "http-status-codes";
 import { cathasync } from "../../utils/catchasynfn";
-
-
+import { sendResponse } from "../../utils/sendResponse";
 
 // const createUser = async (req: Request, res: Response) => {
 //   try {
@@ -42,28 +36,30 @@ const createUser = cathasync(
 
     const user = await userServices.createUserIntoDB(payload);
 
-    res.status(StatusCodes.CREATED).json({
+    sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
       message: "User registered successfully",
-      data: {
-        user,
-      },
+      data: { user },
     });
+
+
   },
 );
-const getUser = async (req: Request, res: Response) => {
-  try {
+
+
+const getUser = cathasync(
+   async (req: Request, res: Response, next: NextFunction) => {
     const userData = await userServices.getUserIntoDB();
-    res
-      .status(StatusCodes.OK)
-      .json({ message: "User retrieved successfully", data: userData });
-  } catch (error) {
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Error occurred while retrieving user" });
-  }
-};
+   sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.CREATED,
+      message: "User retrive successfully",
+      data: { userData },
+    });
+
+
+  },)
 
 export const userController = {
   createUser,
