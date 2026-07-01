@@ -1,8 +1,10 @@
 import { NextFunction, Request, response, Response } from "express";
 import { userServices } from "./user.services";
-import {StatusCodes} from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import { cathasync } from "../../utils/catchasynfn";
 import { sendResponse } from "../../utils/sendResponse";
+import { jwtUtils } from "../../utils/jwt";
+import config from "../../config";
 
 // const createUser = async (req: Request, res: Response) => {
 //   try {
@@ -41,26 +43,46 @@ const createUser = cathasync(
       message: "User registered successfully",
       data: { user },
     });
-
-
   },
 );
 
+const getProfile = cathasync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { accessToken, refreshToken } = req.cookies;
+    const validToke = jwtUtils.verifyToken(
+      accessToken,
+      config.jwt_access_secret,
+    );
+    if (!validToke) {
+      throw new Error("Invalid access token");
+    }
+    if (typeof validToke === "string") {
+      throw new Error("Invalid access token");
+    }
+    const profileData = await userServices.getProfileIntoDB(validToke.id);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Profile retrive successfully",
+      data: { profileData },
+    });
+  },
+);
 
 const getUser = cathasync(
-   async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const userData = await userServices.getUserIntoDB();
-   sendResponse(res, {
+    sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
       message: "User retrive successfully",
       data: { userData },
     });
-
-
-  },)
+  },
+);
 
 export const userController = {
   createUser,
   getUser,
+  getProfile
 };
