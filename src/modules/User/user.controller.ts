@@ -33,7 +33,6 @@ import { sendResponse } from "../../utils/sendResponse";
 const createUser = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-
     const user = await userServices.createUserIntoDB(payload);
 
     sendResponse(res, {
