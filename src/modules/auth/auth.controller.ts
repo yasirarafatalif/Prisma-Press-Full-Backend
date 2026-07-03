@@ -30,7 +30,26 @@ const loginUser = cathasync(
     });
   },
 );
+const refreshToken = cathasync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { refreshToken } = req.cookies;
+    const { accessToken } = await authServices.refreshToken(refreshToken);
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 1 *24  * 60 * 60 * 1000, // 1 day
+    });
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Access token refreshed successfully",
+      data: { accessToken },
+    });
+  },
+);
 
 export const authController = {
   loginUser,
+  refreshToken
 };

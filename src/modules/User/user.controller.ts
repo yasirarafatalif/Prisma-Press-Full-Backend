@@ -48,18 +48,11 @@ const createUser = cathasync(
 
 const getProfile = cathasync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { accessToken, refreshToken } = req.cookies;
-    const validToke = jwtUtils.verifyToken(
-      accessToken,
-      config.jwt_access_secret,
-    );
-    if (!validToke) {
-      throw new Error("Invalid access token");
+    const user = req.user;
+    if (!user) {
+      throw new Error("User not found");
     }
-    if (typeof validToke === "string") {
-      throw new Error("Invalid access token");
-    }
-    const profileData = await userServices.getProfileIntoDB(validToke.id);
+    const profileData = await userServices.getProfileIntoDB(user.id);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,

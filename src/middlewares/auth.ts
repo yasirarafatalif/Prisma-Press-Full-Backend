@@ -20,7 +20,7 @@ declare global {
 }
 
 export const auth = (...roles: Role[]) => {
-    console.log(roles)
+    // console.log(roles)
   return cathasync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies.accessToken
       ? req.cookies.accessToken
