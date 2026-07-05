@@ -43,10 +43,24 @@ const getPostById = cathasync(async (req : Request, res : Response, next : NextF
         data : result
     })
 })
+
+const getMyPots = cathasync(async (req : Request, res : Response, next : NextFunction) => {
+    const userId = req.user?.id;
+    console.log(userId)
+    const result = await postsServices.getMyPots(userId as string);
+
+    sendResponse(res, {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "My Posts retrieved successfully",
+        data : result
+    })
+});
+
 const updatePost = cathasync(async (req: Request, res: Response , next:NextFunction) => {
 
 });
 const deletePost = cathasync(async (req: Request, res: Response , next:NextFunction) => {
 
 });
-export const postController = { createPost, getAllPosts, getPostById, updatePost, deletePost }
+export const postController = { createPost, getAllPosts, getPostById, getMyPots, updatePost, deletePost }

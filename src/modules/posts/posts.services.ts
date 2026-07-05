@@ -27,17 +27,6 @@ const getAllPosts = async () => {
   return posts;
 };
 const getPostById = async (postId: string) => {
-  await prisma.post.update({
-    where: {
-      id: postId,
-    },
-    data: {
-      views: {
-        increment: 1,
-      },
-    },
-  });
-
   const post = await prisma.post.findUniqueOrThrow({
     where: {
       id: postId,
@@ -51,7 +40,41 @@ const getPostById = async (postId: string) => {
       comments: true,
     },
   });
+  await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: {
+      views: {
+        increment: 1,
+      },
+    },
+  });
 
+  return post;
+};
+
+const getMyPots = async (userId: string) => {
+  const post = await prisma.post.findMany({
+    where: {
+      authorId: userId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      comments: true,
+
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
+  });
+  if (!post) {
+    throw new Error("No Post Found");
+  }
   return post;
 };
 const updatePost = async (id: string, payload: any) => {
@@ -67,4 +90,5 @@ export const postsServices = {
   getPostById,
   updatePost,
   deletePost,
+  getMyPots,
 };
