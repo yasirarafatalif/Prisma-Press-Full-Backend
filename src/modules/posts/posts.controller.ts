@@ -28,7 +28,7 @@ const getAllPosts = cathasync(async (req : Request, res : Response, next : NextF
     })
 })
 const getPostById = cathasync(async (req : Request, res : Response, next : NextFunction) => {
-    const postId = req.params.postId;
+    const postId = req.params.id;
 
     if(!postId){
         throw new Error("Post Id Required In Params")
