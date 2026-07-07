@@ -1,5 +1,6 @@
+import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
-import { Post } from "./posts.interface";
+import { IPostQuery, Post } from "./posts.interface";
 
 const createpost = async (payload: Post, userId: string) => {
   const result = await prisma.post.create({
@@ -12,7 +13,71 @@ const createpost = async (payload: Post, userId: string) => {
   return result;
 };
 
-const getAllPosts = async () => {
+const getAllPosts = async (query: IPostQuery) => {
+  const limit = query.limit ? Number(query.limit) : 10;
+  const page = query.page ? Number(query.page) : 1;
+  const skip = (page - 1) * limit;
+
+  const sortBy = query.sortBy ? query.sortBy : "createdAt";
+  const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+
+  const tags = query.tags ? JSON.parse(query.tags as string) : null;
+  const tagsArray = Array.isArray(tags) ? tags : [];
+
+  const andConditions: PostWhereInput[] = [];
+
+  if (query.title) {
+    andConditions.push({
+      title: query.title,
+    });
+  }
+  if (query.status) {
+    andConditions.push({
+      status: query.status,
+    });
+  }
+  if (query.tags) {
+    andConditions.push({
+      tags: {
+        hasSome: tagsArray,
+      },
+    });
+  }
+  if (query.authorId) {
+    andConditions.push({
+      authorId: query.authorId,
+    });
+  }
+
+  if (query.isFeatured) {
+    andConditions.push({
+      isFeatured: Boolean(query.isFeatured),
+    });
+  }
+
+  if (query.searchTerm) {
+    andConditions.push({
+      AND: [
+        {
+          OR: [
+            {
+              title: {
+                contains: query.searchTerm,
+                mode: "insensitive",
+              },
+            },
+            {
+              content: {
+                contains: query.searchTerm,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+      ],
+    });
+  }
+
   const posts = await prisma.post.findMany({
     // exact match
     // where:{
@@ -62,32 +127,46 @@ const getAllPosts = async () => {
     //   ],
     // },
 
-    //combining search (OR Operator) and filtering (AND) 
+    //combining search (OR Operator) and filtering (AND)
 
-    where:{
+    // static mode
 
-      AND:[
-        {
-          OR:[
-            {
-              views: 0
-            },
-            {
-              status:"ARCHIVED"
-            }
-          ]
-        },
-        {
-          tags:{
-            hasSome:["nodejs"]
-          }
-        }
-      ]
+    // where: {
+    //   AND: [
+    //     {
+    //       OR: [
+    //         {
+    //           views: 0,
+    //         },
+    //         {
+    //           status: query.status,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       tags: {
+    //         hasSome: ["nodejs"],
+    //       },
+    //     },
+    //   ],
+    // },
 
+    // dynamic mode
+    where: {
+      AND: andConditions,
     },
 
+    take: limit,
+    skip: skip,
+
+    // static mode
+    // orderBy: {
+    //   createdAt: "asc",
+    // },
+
+    //dynamic mode
     orderBy: {
-      createdAt: "asc",
+      [sortBy]: sortOrder,
     },
     include: {
       comments: true,

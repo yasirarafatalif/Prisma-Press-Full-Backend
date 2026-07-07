@@ -18,7 +18,8 @@ const createPost = cathasync(async (req: Request, res: Response , next:NextFunct
 });
 
 const getAllPosts = cathasync(async (req : Request, res : Response, next : NextFunction) => {
-    const result = await postsServices.getAllPosts();
+    const query = req.query
+    const result = await postsServices.getAllPosts(query);
 
     sendResponse(res, {
         success : true,
