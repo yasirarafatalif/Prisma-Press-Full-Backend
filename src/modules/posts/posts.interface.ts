@@ -7,5 +7,4 @@ export interface Post {
   isFeatured?: boolean;
   status?: PostStatus;
   tags: string[];
-  authorId: string;
 }

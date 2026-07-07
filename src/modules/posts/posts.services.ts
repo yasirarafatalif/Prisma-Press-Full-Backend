@@ -14,12 +14,82 @@ const createpost = async (payload: Post, userId: string) => {
 
 const getAllPosts = async () => {
   const posts = await prisma.post.findMany({
-    include: {
-      author: {
-        omit: {
-          password: true,
+    // exact match
+    // where:{
+    //   title:{
+    //     contains: "Getting Started with Prisma",
+    //   }
+    // },
+
+    // partial match
+    // where: {
+    //   tags:{
+    //     hasSome: ["prisma" , "postgresql", "nodejs"]
+    //   }
+    // },
+
+    // filtering / exact match with AND Operator
+    // where:{
+    //   AND:[
+    //     {
+    //       status:"PUBLISHED"
+    //     },
+    //     {
+    //       tags: {
+    //        hasSome:["prisma"]
+    //       }
+    //     }
+    //   ]
+
+    // },
+
+    // searching / partial search with OR operator
+
+    // where: {
+    //   OR: [
+    //     {
+    //       content: {
+    //         contains: "prisma",
+    //         mode: "insensitive",
+    //       },
+    //     },
+    //     {
+    //       title: {
+    //         contains: "gett",
+    //         mode: "insensitive",
+    //       },
+    //     },
+    //   ],
+    // },
+
+    //combining search (OR Operator) and filtering (AND) 
+
+    where:{
+
+      AND:[
+        {
+          OR:[
+            {
+              views: 0
+            },
+            {
+              status:"ARCHIVED"
+            }
+          ]
         },
-      },
+        {
+          tags:{
+            hasSome:["nodejs"]
+          }
+        }
+      ]
+
+    },
+
+    orderBy: {
+      createdAt: "asc",
+    },
+    include: {
       comments: true,
     },
   });

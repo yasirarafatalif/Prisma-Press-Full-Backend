@@ -19,6 +19,6 @@ const createComment = async (authorId: string, payload: ICreateCommentPayload) =
 }
 
 
-export const commetsService = {  
+export const commentsService = {  
     createComment
  }
